@@ -1,4 +1,3 @@
-// ============================================================
 //  Smart Traffic Simulation — Single File
 //  Improvements:
 //   - Density-based adaptive green time
@@ -10,15 +9,12 @@
 //   - Fixed IntersectionState type safety
 //   - Vehicle windshield detail
 //   - NS/EW density HUD bars
-// ============================================================
 
 #include "raylib.h"
 #include <vector>
 #include <cmath>
 
-// ============================================================
-//  GEOMETRY CONSTANTS  (change W/H here and everything follows)
-// ============================================================
+//  (change W/H here and everything follows)
 static const int   W          = 1200;
 static const int   H          = 900;
 static const int   ROAD_W     = 220;   // total road width
@@ -46,9 +42,7 @@ static const float MAX_GREEN  = 22.0f;
 static const float BASE_GREEN = 10.0f;
 static const float YELLOW_DUR =  2.0f;
 
-// ============================================================
 //  ENUMS & STRUCTS
-// ============================================================
 enum IntersectionState { NS_GREEN, NS_YELLOW, EW_GREEN, EW_YELLOW };
 
 struct Vehicle {
@@ -63,9 +57,7 @@ struct Vehicle {
 // UI globals
 static int selectedType = 0; // 0=car 1=ambulance
 
-// ============================================================
 //  HELPERS
-// ============================================================
 int CountLane(const std::vector<Vehicle>& v, int dir) {
     int c = 0;
     for (const auto& x : v) if (x.direction == dir) c++;
@@ -93,9 +85,7 @@ int CountApproaching(const std::vector<Vehicle>& vehicles, int dir) {
     return c;
 }
 
-// ============================================================
 //  SPAWN
-// ============================================================
 void SpawnVehicle(std::vector<Vehicle>& vehicles, int dir, bool amb) {
     Vehicle v;
     v.direction   = dir;
@@ -120,9 +110,7 @@ void SpawnVehicle(std::vector<Vehicle>& vehicles, int dir, bool amb) {
     if (clear) vehicles.push_back(v);
 }
 
-// ============================================================
 //  TRAFFIC LIGHT UPDATE  (density-adaptive)
-// ============================================================
 void UpdateTraffic(IntersectionState& state, float& timer,
                    const std::vector<Vehicle>& vehicles, float dt) {
     timer += dt;
@@ -169,9 +157,7 @@ void UpdateTraffic(IntersectionState& state, float& timer,
     }
 }
 
-// ============================================================
 //  VEHICLE UPDATE  (smooth braking + ambulance push)
-// ============================================================
 void UpdateVehicles(std::vector<Vehicle>& vehicles,
                     IntersectionState state, float dt) {
 
@@ -258,10 +244,7 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles,
     }
 }
 
-// ============================================================
 //  DRAW HELPERS
-// ============================================================
-
 // 3-bulb traffic light pole
 void DrawTrafficLight(int x, int y, Color active) {
     // pole
@@ -406,9 +389,7 @@ void DrawScene(int W, int H, const std::vector<Vehicle>& vehicles,
     EndDrawing();
 }
 
-// ============================================================
 //  MAIN
-// ============================================================
 int main() {
     InitWindow(W, H, "Smart Traffic Simulation");
     SetTargetFPS(60);
