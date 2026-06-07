@@ -58,12 +58,14 @@ struct Vehicle {
 static int selectedType = 0; // 0=car 1=ambulance
 
 //  HELPERS
+// counts how many are currently traveling in a specific direction
 int CountLane(const std::vector<Vehicle>& v, int dir) {
     int c = 0;
     for (const auto& x : v) if (x.direction == dir) c++;
     return c;
 }
 
+// scans if an emergency ambulance vehicle is present.
 bool AmbulanceInLane(const std::vector<Vehicle>& v, int dir) {
     for (const auto& x : v)
         if (x.direction == dir && x.isAmbulance) return true;
@@ -101,7 +103,9 @@ void SpawnVehicle(std::vector<Vehicle>& vehicles, int dir, bool amb) {
         case 2: v.rect = { (float)(-60),                (float)(RCY + 10), 50, 30 }; break; // E: bottom half, left entry
         case 3: v.rect = { (float)(W + 20),             (float)(RCY - LANE_W + 10), 50, 30 }; break; // W: top half, right entry
     }
-
+    
+    //if spawn boundry == full => discard spawn request
+    //if spawn boundry == clear => vehicle added to vector
     bool clear = true;
     for (const auto& e : vehicles)
         if (e.direction == v.direction && CheckCollisionRecs(v.rect, e.rect))
