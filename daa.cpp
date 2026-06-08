@@ -126,12 +126,15 @@ void UpdateTraffic(IntersectionState& state, float& timer,
     bool ewAmb = AmbulanceInLane(vehicles,2) || AmbulanceInLane(vehicles,3);
 
     // Ambulance override
+    //light snap green if ambulance is in that lane
     if (nsAmb && !ewAmb) { state = NS_GREEN; timer = 0; return; }
     if (ewAmb && !nsAmb) { state = EW_GREEN; timer = 0; return; }
+    //if amb in both lane then priority falls back to the denser lane.
     if (nsAmb && ewAmb)  { state = (ns >= ew) ? NS_GREEN : EW_GREEN; timer = 0; return; }
 
+    
     // Density-based green time:
-    //   heavier lane gets up to MAX_GREEN, lighter lane as low as MIN_GREEN
+    //  heavier lane gets up to MAX_GREEN, lighter lane as low as MIN_GREEN
     int total = ns + ew;
     float nsGreen = BASE_GREEN, ewGreen = BASE_GREEN;
     if (total > 0) {
