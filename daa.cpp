@@ -210,6 +210,7 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles,
             if (gap >= 0 && gap < minGap) minGap = gap;
 
             // ambulance pushing car ahead
+            //if car present within 100 pixel above amb it is pushed by amb
             if (!v.isAmbulance && o.isAmbulance) {
                 float behind = 1e9f;
                 switch (v.direction) {
@@ -223,10 +224,10 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles,
         }
 
         // smooth braking based on gap
-        if (minGap < 80.0f)  desired = fminf(desired, v.maxSpeed * (minGap / 80.0f));
-        if (minGap < 5.0f)   desired = 0;
-        if (pushedByAmb)     desired = fmaxf(desired, 300.0f);
-
+        if (minGap < 80.0f)  desired = fminf(desired, v.maxSpeed * (minGap / 80.0f)); //slow down proportionally        
+        if (minGap < 5.0f)   desired = 0; //stops completely
+        if (pushedByAmb)     desired = fmaxf(desired, 300.0f); // overrides restrictions to speed out of the way
+        
         // lerp speed toward desired
         float accel = (desired > v.speed) ? 200.0f : 400.0f;
         if (v.speed < desired) v.speed = fminf(v.speed + accel * dt, desired);
@@ -243,6 +244,7 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles,
     }
 
     // cull off-screen
+    // vehicle that travelled 200 pixels past screen memory will be removed from memory
     for (auto it = vehicles.begin(); it != vehicles.end(); ) {
         if (it->rect.x < -200 || it->rect.x > W+200 ||
             it->rect.y < -200 || it->rect.y > H+200)
@@ -281,7 +283,7 @@ void DrawDashedLine(int x1, int y1, int x2, int y2, int dashLen, Color c) {
 void DrawVehicle(const Vehicle& v) {
     DrawRectangleRec(v.rect, v.color);
 
-    // windshield
+    // windshield (sky blue rectengle in car)
     Color glass = ColorAlpha(SKYBLUE, 0.7f);
     if (v.direction == 0 || v.direction == 1) { // vertical
         DrawRectangle((int)v.rect.x+4, (int)v.rect.y+8, (int)v.rect.width-8, 10, glass);
@@ -297,7 +299,7 @@ void DrawVehicle(const Vehicle& v) {
         DrawRectangle(cx-2, cy-6, 4, 12, RED);
     }
 }
-
+// UI spawn pannel in the top right corner
 void DrawUI(int W) {
     int x = W - 200, y = 20;
     DrawRectangleRounded({(float)x,(float)y,178,110}, 0.1f, 4, {30,30,30,220});
@@ -312,6 +314,7 @@ void DrawUI(int W) {
     DrawText("Click a lane to spawn", x+10, y+92, 11, DARKGRAY);
 }
 
+//dynamic timers and live vehicle metrics.
 void DrawHUD(const std::vector<Vehicle>& vehicles,
              IntersectionState state, float timer,
              float nsGreen, float ewGreen) {
@@ -351,13 +354,13 @@ void DrawScene(int W, int H, const std::vector<Vehicle>& vehicles,
     DrawRectangle(ROAD_LEFT, ROAD_TOP, ROAD_W, ROAD_W, {70,70,70,255});
 
     // ---- road markings ----
-    // dashed centre lines
+    // dashed centre lines (yellow)
     DrawDashedLine(RCX, 0,      RCX, ROAD_TOP,  20, {200,200,0,180});
     DrawDashedLine(RCX, ROAD_BOT, RCX, H,        20, {200,200,0,180});
     DrawDashedLine(0, RCY,      ROAD_LEFT, RCY,  20, {200,200,0,180});
     DrawDashedLine(ROAD_RIGHT, RCY, W, RCY,      20, {200,200,0,180});
 
-    // stop lines
+    // stop lines (L shaped)
     DrawLineEx({(float)ROAD_LEFT,(float)STOP_S},{(float)RCX,(float)STOP_S},3,WHITE);
     DrawLineEx({(float)RCX,(float)STOP_N},{(float)ROAD_RIGHT,(float)STOP_N},3,WHITE);
     DrawLineEx({(float)STOP_E,(float)ROAD_TOP},{(float)STOP_E,(float)RCY},3,WHITE);
