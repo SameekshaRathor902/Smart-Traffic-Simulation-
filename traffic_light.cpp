@@ -2,6 +2,7 @@
 #include "vehicle.h"
 #include "constants.h"
 
+// Count vehicles that are still approaching / waiting (haven't cleared the intersection)
 int CountApproaching(const std::vector<Vehicle>& vehicles, int dir) {
     int c = 0;
     for (const auto& v : vehicles) {
@@ -16,6 +17,7 @@ int CountApproaching(const std::vector<Vehicle>& vehicles, int dir) {
     return c;
 }
 
+//  TRAFFIC LIGHT UPDATE  (density-adaptive)
 void UpdateTraffic(IntersectionState& state, float& timer, const std::vector<Vehicle>& vehicles, float dt) {
     timer += dt;
 
@@ -31,6 +33,7 @@ void UpdateTraffic(IntersectionState& state, float& timer, const std::vector<Veh
     if (nsAmb && ewAmb)  { state = (ns >= ew) ? NS_GREEN : EW_GREEN; timer = 0; return; }
 
     // Density-based green time calculations
+    //  heavier lane gets up to MAX_GREEN, lighter lane as low as MIN_GREEN
     int total = ns + ew;
     float nsGreen = BASE_GREEN, ewGreen = BASE_GREEN;
     if (total > 0) {
@@ -40,8 +43,9 @@ void UpdateTraffic(IntersectionState& state, float& timer, const std::vector<Veh
         ewGreen = MIN_GREEN + ewRatio * (MAX_GREEN - MIN_GREEN);
     }
 
-    // Early skip configuration
-    static const float GRACE = 1.5f; 
+    // Early-skip: if the currently-green direction has NO approaching vehicles
+    // and the waiting direction does, cut straight to yellow after a short grace period.
+    static const float GRACE = 1.5f; // seconds before skipping an empty green
     int nsApproach = CountApproaching(vehicles, 0) + CountApproaching(vehicles, 1);
     int ewApproach = CountApproaching(vehicles, 2) + CountApproaching(vehicles, 3);
 
