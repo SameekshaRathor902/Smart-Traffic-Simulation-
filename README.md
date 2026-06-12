@@ -34,6 +34,10 @@ You need a C++ toolchain (GCC/Clang or MSVC) and the **Raylib (v4.0 or newer)** 
 
 Open your terminal or command prompt inside the project root directory and execute the compilation step matching your setup:
 
+#### Using MinGW on Windows (with Raylib installed locally)
+```bash
+g++ main.cpp traffic_light.cpp vehicle.cpp renderer.cpp -lraylib -lopengl32 -lgdi32 -lwinmm -O2 -o smart_traffic.exe
+
 #### Using g++ (Linux / macOS)
 ```bash
 g++ main.cpp traffic_light.cpp vehicle.cpp renderer.cpp -lraylib -O2 -o smart_traffic
