@@ -2,18 +2,22 @@
 #include "constants.h"
 #include <cmath>
 
+//  HELPERS
+// counts how many are currently traveling in a specific direction
 int CountLane(const std::vector<Vehicle>& v, int dir) {
     int c = 0;
     for (const auto& x : v) if (x.direction == dir) c++;
     return c;
 }
 
+// scans if an emergency ambulance vehicle is present.
 bool AmbulanceInLane(const std::vector<Vehicle>& v, int dir) {
     for (const auto& x : v)
         if (x.direction == dir && x.isAmbulance) return true;
     return false;
 }
 
+//  SPAWN
 void SpawnVehicle(std::vector<Vehicle>& vehicles, int dir, bool amb) {
     Vehicle v;
     v.direction   = dir;
@@ -22,6 +26,7 @@ void SpawnVehicle(std::vector<Vehicle>& vehicles, int dir, bool amb) {
     v.speed       = v.maxSpeed;
     v.color       = amb ? RAYWHITE : BLUE;
 
+    // Each direction gets its own lane (left-hand traffic convention)
     switch (dir) {
         case 0: v.rect = { (float)(RCX - LANE_W + 10), (float)(-60),       30, 50 }; break;
         case 1: v.rect = { (float)(RCX + 10),           (float)(H + 20),   30, 50 }; break;
@@ -29,6 +34,8 @@ void SpawnVehicle(std::vector<Vehicle>& vehicles, int dir, bool amb) {
         case 3: v.rect = { (float)(W + 20),             (float)(RCY - LANE_W + 10), 50, 30 }; break;
     }
 
+    //if spawn boundry == full => discard spawn request
+    //if spawn boundry == clear => vehicle added to vector
     bool clear = true;
     for (const auto& e : vehicles)
         if (e.direction == v.direction && CheckCollisionRecs(v.rect, e.rect))
@@ -37,6 +44,7 @@ void SpawnVehicle(std::vector<Vehicle>& vehicles, int dir, bool amb) {
     if (clear) vehicles.push_back(v);
 }
 
+//  VEHICLE UPDATE  (smooth braking + ambulance push)
 void UpdateVehicles(std::vector<Vehicle>& vehicles, IntersectionState state, float dt) {
     bool nsRed = (state == EW_GREEN || state == EW_YELLOW || state == NS_YELLOW);
     bool ewRed = (state == NS_GREEN || state == NS_YELLOW || state == EW_YELLOW);
@@ -60,6 +68,7 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles, IntersectionState state, flo
         if (atRed) desired = 0;
 
         // Safe spacing calculations
+        // gap to car ahead
         float minGap = 1e9f;
         bool  pushedByAmb = false;
 
@@ -77,6 +86,8 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles, IntersectionState state, flo
             }
             if (gap >= 0 && gap < minGap) minGap = gap;
 
+            // ambulance pushing car ahead
+            //if car present within 100 pixel above amb it is pushed by amb
             if (!v.isAmbulance && o.isAmbulance) {
                 float behind = 1e9f;
                 switch (v.direction) {
@@ -90,10 +101,12 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles, IntersectionState state, flo
         }
 
         // LERP movement updates
-        if (minGap < 80.0f)  desired = fminf(desired, v.maxSpeed * (minGap / 80.0f));
-        if (minGap < 5.0f)   desired = 0;
-        if (pushedByAmb)     desired = fmaxf(desired, 300.0f);
+        // smooth braking based on gap
+        if (minGap < 80.0f)  desired = fminf(desired, v.maxSpeed * (minGap / 80.0f)); //slow down proportionally
+        if (minGap < 5.0f)   desired = 0; //stops completely
+        if (pushedByAmb)     desired = fmaxf(desired, 300.0f); // overrides restrictions to speed out of the way
 
+        // lerp speed toward desired
         float accel = (desired > v.speed) ? 200.0f : 400.0f;
         if (v.speed < desired) v.speed = fminf(v.speed + accel * dt, desired);
         else                   v.speed = fmaxf(v.speed - accel * dt, desired);
@@ -109,6 +122,8 @@ void UpdateVehicles(std::vector<Vehicle>& vehicles, IntersectionState state, flo
     }
 
     // Cleanup offscreen instances
+    // cull off-screen
+    // vehicle that travelled 200 pixels past screen memory will be removed from memory
     for (auto it = vehicles.begin(); it != vehicles.end(); ) {
         if (it->rect.x < -200 || it->rect.x > W+200 || it->rect.y < -200 || it->rect.y > H+200)
             it = vehicles.erase(it);
