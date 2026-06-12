@@ -1,7 +1,7 @@
 # Smart-Traffic-Simulation-
 This is a smart traffic simulation using the Raylib library. It features an adaptive intersection that adjusts traffic light timings using density-based algorithms and provides a visual override for ambulances. The UI includes interactive mouse spawning, HUD density bars, and vehicle/road detailed rendering.
 
-##FEATURES
+## FEATURES
 
 * **Density-Based Adaptive Timing:** Traffic light cycles dynamically scale green light durations between a minimum and maximum window depending on relative vehicle counts in respective lanes.
 * **Emergency Vehicle Override:** Detects incoming ambulances and automatically triggers green light override sequences with a "push-ahead" logic that forces leading cars to move out of the way.
@@ -10,7 +10,7 @@ This is a smart traffic simulation using the Raylib library. It features an adap
 * **Manual Vehicle Spawning:** Click directly on incoming lanes to dynamically spawn standard cars or ambulances.
 * **Polished 2D Visuals:** Detailed road markings, crosswalk stripes, windshield details, and explicit 3-bulb light poles.
 
-##PROJECT STRUCTURE
+## PROJECT STRUCTURE
 
 The project has been refactored into a modular, clean multi-file architecture to decouple data structures, application state logic, and Raylib rendering tasks:
 
@@ -20,7 +20,7 @@ The project has been refactored into a modular, clean multi-file architecture to
 * **`renderer.h` / `.cpp`** - Encapsulates all drawing pipelines, HUD progress bars, and custom asset rendering logic.
 * **`main.cpp`** - Initializes the window context, processes mouse input polling, and loops core simulation update intervals.
 
-##GETTING STARTED
+## GETTING STARTED
 
 ### Prerequisites
 
