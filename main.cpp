@@ -19,7 +19,7 @@ int main() {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
-        // ---- INPUT HANDLING ----
+        // INPUT HANDLING 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             Vector2 m = GetMousePosition();
             int px = W - 200, py = 20;
@@ -45,7 +45,7 @@ int main() {
             }
         }
 
-        // ---- SIMULATION UPDATES ----
+        // SIMULATION UPDATES
         {
             int ns = CountLane(vehicles, 0) + CountLane(vehicles, 1);
             int ew = CountLane(vehicles, 2) + CountLane(vehicles, 3);
